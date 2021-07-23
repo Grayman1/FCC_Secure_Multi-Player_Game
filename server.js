@@ -8,6 +8,37 @@ const fccTestingRoutes = require('./routes/fcctesting.js');
 const runner = require('./test-runner.js');
 
 const app = express();
+const helmet = require('helmet')
+
+const noCache = require('nocache')
+
+app.use(noCache())
+
+
+app.use(helmet.noSniff())
+app.use(helmet.xssFilter())
+/*
+app.use(
+  helmet.dnsPrefetchControl({
+    allow: false,
+  })
+);
+*/
+app.use(helmet.hidePoweredBy({ setTo: "PHP 7.4.3" }));
+
+
+//app.use(helmet.noCache())
+
+
+/*
+
+// Index page (static HTML)
+app.route('/')
+  .get(function (req, res) {
+    res.set('x-powered-by', 'PHP 7.4.3');
+    res.sendFile(process.cwd() + '/views/index.html');
+  }); 
+*/
 
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use('/assets', express.static(process.cwd() + '/assets'));
@@ -48,5 +79,10 @@ const server = app.listen(portNum, () => {
     }, 1500);
   }
 });
+
+const io = socket(server);
+io.on('connection', (socket) => {
+  console.log(`${socket.id} connected`)
+})
 
 module.exports = app; // For testing
