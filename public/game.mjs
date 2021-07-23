@@ -16,10 +16,13 @@ const loadImg = (src) => {
   return tempImg;
 }
 
-// Images to Loading
+// Images to Load
 
 const bone1 = loadImg('./img/bone1.png')
+const red_gem = loadImg('./img/red_gem.png')
+const blue_gem = loadImg('./img/blue_gem.png')
 const green_gem = loadImg('./img/green_gem.png')
+const diamong_gem = loadImg('./img/diamond.png')
 const bone2 = loadImg('./img/bone2.png')
 const ship1 = loadImg('./img/ship1.png')
 const ship2 = loadImg('./img/ship2.png')
@@ -84,5 +87,9 @@ const canvasCalcs = {
 const generateStartPos = (min, max, multiple) => {
   return Math.floor(Math.random() * ((max - min) / multiple)) * multiple + min;
 };
+
+
+// DECLARE GAME STATES
+
 
 
