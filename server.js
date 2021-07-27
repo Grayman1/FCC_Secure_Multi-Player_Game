@@ -80,6 +80,7 @@ const server = app.listen(portNum, () => {
   }
 });
 
+<<<<<<< HEAD
 // Initial Game Set-Up
 let activePlayers = [];
 let caughtCoins = ];
@@ -166,6 +167,11 @@ io.on('connection', (socket) => {
 
   })
 
+=======
+const io = socket(server);
+io.on('connection', (socket) => {
+  console.log(`${socket.id} connected`)
+>>>>>>> 8d6a45f21d9699c2faa13cba04ea8d40c74eec49
 })
 
 module.exports = app; // For testing
