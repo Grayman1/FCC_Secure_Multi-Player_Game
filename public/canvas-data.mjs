@@ -16,9 +16,11 @@ const canvasCalcs = {
   playFieldMaxY: canvasHeight - playerHeight - border,
 };
 
+//console.log(canvasWidth, playFieldMaxX, playFieldMinX);
+
+
 const generateStartPos = (min, max, multiple) => {
   return Math.floor(Math.random() * ((max - min) / multiple)) * multiple + min;
 };
 
 export { generateStartPos, canvasCalcs };
-

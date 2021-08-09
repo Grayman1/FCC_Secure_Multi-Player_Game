@@ -1,5 +1,5 @@
-
-const controls = (player, socket) => {
+//const controls = (player, socket) => {
+const motionControl = (player, socket) => {
   const getKey = (e) => {
     if (e.keyCode === 87 || e.keyCode === 38) return "up";
     if (e.keyCode === 83 || e.keyCode === 40) return "down";
@@ -30,5 +30,5 @@ const controls = (player, socket) => {
   };
 };
 
-export default controls;
+export default motionControl;
 

@@ -1,11 +1,20 @@
-
+import Player from './Player.mjs';
+import Collectible from './Collectible.mjs';
+import generateStartPos from './canvas-data.mjs';
+import canvasCalcs from './canvas-data.mjs';
+import motionControl from './Controls.mjs';
+/*
 const {Player} = require("./Player.mjs");
 const {Collectible} = require("./Collectible.mjs");
+*/
 
-const socket = io();
+const socket=io();
 const canvas = document.getElementById("game-window");
 const context = canvas.getContext("2d");
+
 console.log(canvas.width, canvas.height);
+
+/*
 //  Canvas Settings
 const canvasWidth = 640;
 const canvasHeight = 480;
@@ -26,10 +35,11 @@ const canvasCalcs = {
   playFieldMaxY: canvasHeight - playerHeight - border,
 };
 
-const startPosition = (min, max, multiple) => {
+const generateStartPos = (min, max, multiple) => {
   return Math.floor(Math.random() * ((max - min) / multiple)) * multiple + min;
 };
-
+*/
+/*
 // Controls Functions
 const motionControl = (player, socket) => {
   const getKey = (e) => {
@@ -62,22 +72,22 @@ const motionControl = (player, socket) => {
     }
   };
 };
+*/
 
 
-
-// Pre-Load Images
+// Pre-Load Token, Player Images
 const loadImage = (src) => {
   const img = new Image();
   img.src = src;
   return img;
-};
+};                                 
 
 const red_gem = loadImage('./img/red_gem.png');
-const blue_gem = loadImage('./img/blue_gem.png')
-const green_gem = loadImage('./img/green_gem.png')
-const diamond = loadImage('./img/diamond.png')
-const playerImg = loadImage('./img/player.png')
-const opponentImg = loadImage('./img/opponent.png')
+const blue_gem = loadImage('./img/blue_gem.png');
+const green_gem = loadImage('./img/green_gem.png');
+const diamond = loadImage('./img/diamond.png');
+const playerImg = loadImage('./img/player.png');
+const opponentImg = loadImage('./img/opponent.png');
 /*
 const bronzeCoinArt = loadImage(
   "https://cdn.freecodecamp.org/demo-projects/images/bronze-coin.png"
@@ -102,16 +112,53 @@ let currPlayers = [];
 let item;
 let endGame;
 
+/*
+const createCoin = () => {
+  const rand = Math.random();
+  let coinValue;
+
+  if(rand <0.25) {
+    coinValue = 1;
+  } else if (rand < 0.5) {
+    coinValue= 2;
+  } else if (rand < 0.75) {
+    coinValue = 3;
+  } else {
+    coinValue = 4;
+  }
+
+  return new Collectible({
+    x: generateStartPos(
+      canvasCalcs.playFieldMinX,
+      canvasCalcs.playfieldMaxX,
+      5
+    ),
+    y: generateStartPos(
+      canvasCalcs.playFieldMinY,
+      canvasCalcs.playfieldMaxY,
+      5
+    ),
+    value: coinValue,
+    id: Date.now(),
+
+  })
+}
+*/
 socket.on("init", ({ id, players, coin }) => {
-  console.log("Connected as", id);
-  cancelAnimationFrame(frameId);
+  
+  console.log(`Connected ${id}`);
+//  console.log("Connected as", id);
+
+  // Cancel animation if one already exists
+  cancelAnimationFrame(frameId);  
+  
   const mainPlayer = new Player({
-    x: startPosition(
+    x: generateStartPos(
       canvasCalcs.playFieldMinX,
       canvasCalcs.playFieldMaxX,
       5
     ),
-    y: startPosition(
+    y: generateStartPos(
       canvasCalcs.playFieldMinY,
       canvasCalcs.playFieldMaxY,
       5
@@ -119,12 +166,17 @@ socket.on("init", ({ id, players, coin }) => {
     id,
     main: true,
   });
+
   motionControl(mainPlayer, socket);
+
   socket.emit("new-player", mainPlayer);
+
   socket.on("new-player", (obj) => {
     const playersId = currPlayers.map((player) => player.id);
     if (!playersId.includes(obj.id)) currPlayers.push(new Player(obj));
   });
+
+  // Handle Player Moves
   socket.on("move-player", ({ id, dir, posObj }) => {
     const movingPlayer = currPlayers.find((obj) => obj.id === id);
     movingPlayer.moveDir(dir);
@@ -133,6 +185,7 @@ socket.on("init", ({ id, players, coin }) => {
     movingPlayer.x = posObj.x;
     movingPlayer.y = posObj.y;
   });
+  // Handle Player stop motion
   socket.on("stop-player", ({ id, dir, posObj }) => {
     const stoppingPlayer = currPlayers.find((obj) => obj.id === id);
     stoppingPlayer.stopDir(dir);
@@ -144,17 +197,26 @@ socket.on("init", ({ id, players, coin }) => {
   socket.on("new-coin", (newCoin) => {
     item = new Collectible(newCoin);
   });
+
   socket.on("remove-player", (id) => {
     console.log(`${id} disconnected`);
     currPlayers = currPlayers.filter((player) => player.id !== id);
   });
+
+  // Handle end game state
   socket.on("end-game", (result) => (endGame = result));
+
+  // Handle Player Scoring
   socket.on("update-player", (playerObj) => {
-    const scoring = currPlayers.find((obj) => obj.id === playerObj.id);
-    scoring.score = playerObj.score;
+    const scoringPlayer = currPlayers.find((obj) => obj.id === playerObj.id);
+    scoringPlayer.score = playerObj.score;
   });
+
+  // Populate List of Connected Players and
+  // Create Current Coin when Logging In
   currPlayers = players.map((val) => new Player(val)).concat(mainPlayer);
   item = new Collectible(coin);
+
   draw();
 });
 
@@ -213,8 +275,3 @@ const draw = () => {
 
   if (!endGame) frameId = requestAnimationFrame(draw);
 };
-export {
-  startPosition,
-  canvasCalcs
-}
-
