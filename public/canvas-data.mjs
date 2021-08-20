@@ -19,8 +19,8 @@ const canvasCalcs = {
 //console.log(canvasWidth, playFieldMaxX, playFieldMinX);
 
 
-const generateStartPos = (min, max, multiple) => {
+const genStartPosition = (min, max, multiple) => {
   return Math.floor(Math.random() * ((max - min) / multiple)) * multiple + min;
 };
 
-export { generateStartPos, canvasCalcs };
+export { genStartPosition, canvasCalcs };
