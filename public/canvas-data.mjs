@@ -1,7 +1,7 @@
 const canvasWidth = 640;
 const canvasHeight = 480;
-const playerWidth = 30;
-const playerHeight = 30;
+const playerWidth = 50;
+const playerHeight = 50;
 const border = 5; // Between edge of canvas and play field
 const infoBar = 45;
 
@@ -18,9 +18,11 @@ const canvasCalcs = {
 
 //console.log(canvasWidth, playFieldMaxX, playFieldMinX);
 
-
+/*
 const genStartPosition = (min, max, multiple) => {
   return Math.floor(Math.random() * ((max - min) / multiple)) * multiple + min;
 };
 
 export { genStartPosition, canvasCalcs };
+*/
+export { canvasCalcs };

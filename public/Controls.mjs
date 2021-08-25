@@ -25,18 +25,6 @@ const controls = (player, socket) => {
     }  
   };
 
-/*
-  document.onkeydown = (e) => {
-    let dir = getKey(e); 
-
-    if (dir) {
-      player.moveDir(dir);
-
-      // Pass current player position back to the server
-      socket.emit("move-player", dir, { x: player.x, y: player.y });
-    }    
-  };
-*/
   document.onkeyup = (e) => {
     let dir = getKey(e);
 

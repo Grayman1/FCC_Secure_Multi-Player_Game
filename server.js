@@ -67,7 +67,9 @@ const server = app.listen(portNum, () => {
 // Socket.io to the same port
 const io = socket(server);
 const Collectible = require("./public/Collectible");
-const { genStartPosition, canvasCalcs } = require("./public/canvas-data");
+//const { genStartPosition, canvasCalcs } = require("./public/canvas-data");
+const { genStartPosition } = require("./public/randlocation.mjs");
+const {canvasCalcs } = require("./public/canvas-data.mjs");
 
 let activePlayers = [];
 const capturedTokens = [];
@@ -77,7 +79,7 @@ const capturedTokens = [];
 const createNewToken = () => {
   const rand = Math.random();
   let tokenValue;
-
+  // Randomly select New Token Type
   if (rand < 0.25) {
     tokenValue = 1;
   } else if (rand < 0.60) {
@@ -87,7 +89,7 @@ const createNewToken = () => {
   } else {
     tokenValue = 8;
   }
-
+  // Randomly Select New Token Position
   return new Collectible({
     x: genStartPosition(
       canvasCalcs.playFieldMinX,
@@ -104,51 +106,53 @@ const createNewToken = () => {
   });
 };
 
-
-
 let token = createNewToken();
 
 
-// on Connection, Expect main socket
+// on Client connection, Expect main socket
 io.sockets.on("connection", (socket) => {
-  console.log(`New connection ${socket.id}`);
+  console.log(`New Player connected on: ${socket.id}`);
 
   // Emit init with socket id for client to create Player
   socket.emit("init", { id: socket.id, players: activePlayers, token });
 
   // Listen on Init, expect New Player
   socket.on("new-player", (obj) => {
+    // Add New Player to ActivePlayer array
     obj.id = socket.id;
     activePlayers.push(obj);
+    // Broadcast the New Player
     socket.broadcast.emit("new-player", obj);
   });
   // Listen on Movement, expect Updated Player Info
   socket.on("move-player", (dir, obj) => {
-    const movingPlayer = activePlayers.find((player) => player.id === socket.id);
-    if (movingPlayer) {
-      movingPlayer.x = obj.x;
-      movingPlayer.y = obj.y;
+    const playerMoves = activePlayers.find((player) => player.id === socket.id);
+    if (playerMoves) {
+      playerMoves.x = obj.x;
+      playerMoves.y = obj.y;
 
+      // Broadcast Updated Info for Moved Player
       socket.broadcast.emit("move-player", {
         id: socket.id,
         dir,
-        posObj: { x: movingPlayer.x, y: movingPlayer.y },
+        posObj: { x: playerMoves.x, y: playerMoves.y },
       });
     }
   });
   // Listen on Stop Movement, expect Updated Player Info
   socket.on("stop-player", (dir, obj) => {
-    const stoppingPlayer = activePlayers.find(
+    const playerStops = activePlayers.find(
       (player) => player.id === socket.id
     );
-    if (stoppingPlayer) {
-      stoppingPlayer.x = obj.x;
-      stoppingPlayer.y = obj.y;
+    if (playerStops) {
+      playerStops.x = obj.x;
+      playerStops.y = obj.y;
 
+      // Broadcast Updated Info for Stopped Player
       socket.broadcast.emit("stop-player", {
         id: socket.id,
         dir,
-        posObj: { x: stoppingPlayer.x, y: stoppingPlayer.y },
+        posObj: { x: playerStops.x, y: playerStops.y },
       });
     }
   });
@@ -157,7 +161,7 @@ io.sockets.on("connection", (socket) => {
     if (!capturedTokens.includes(tokenId)) {
       const scoringPlayer = activePlayers.find((obj) => obj.id === playerId);
       const sock = io.sockets.connected[scoringPlayer.id];
-
+      // Update Scoring Player's Score
       scoringPlayer.score += tokenValue;
       capturedTokens.push(tokenId);
 
@@ -165,55 +169,25 @@ io.sockets.on("connection", (socket) => {
       io.emit("update-player", scoringPlayer);
 
       // Communicate win state and broadcast losses
+      // Check if Game Over Condition Met
       // Set Max Score for Win
       if (scoringPlayer.score >= 20) {
-        console.log("send 'end-game' from server.js");
+    //    console.log("send 'end-game' from server.js");
         sock.emit("end-game", "win");
         sock.broadcast.emit("end-game", "lose");
       }
 
-      // Generate new token and send it to all players
+      // Generate new token 
       token = createNewToken();
+      // And Send It to All Players
       io.emit("new-token", token);
     }
   });
 
-  // Handle Game Reset Request
-  socket.on('reset-request', (socket) => {
-    console.log('reset-request sent');
-    console.log("end-game-server.js:", endGame)
-    if (!endGame == '') {
-      endGame == '';
-
-    // Reset Players
-      activePlayers.forEach(obj => {
-        if (Number.isInteger(obj.id)) {
-        //  let startCoords = defaultPlayerStart(obj.id);
-          obj.x = genStartPosition(
-            canvasCalcs.playFieldMinX,
-            canvasCalcs.playFieldMaxX,
-            5
-          );
-          obj.y = genStartPosition(
-            canvasCalcs.playFieldMinY,
-            canvasCalcs.playFieldMaxY,
-            5
-          );
-          obj.score = 0;
-        }
-      })
-      // Send out New Game State Info
-      io.emit('new-game', activePlayers)
-    }
-    else {
-      console.log("Reset requested but game isn't over yet");
-    }
-  })
-
   // Listen on Player Disconnecting
   socket.on("disconnect", () => {
     socket.broadcast.emit("player-disconnect", socket.id);
-    console.log(`${socket.id} Player disconnected`);
+    console.log(`Player on: ${socket.id}  disconnected`);
 
     // Remove Disconnected Player from Active Player array
     activePlayers = activePlayers.filter((player) => player.id !== socket.id);

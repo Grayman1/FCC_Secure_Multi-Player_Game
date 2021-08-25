@@ -1,7 +1,9 @@
 import Player from "./Player.mjs";
 import Collectible from "./Collectible.mjs";
 import controls from "./Controls.mjs";
-import { genStartPosition, canvasCalcs } from "./canvas-data.mjs";
+//import { genStartPosition, canvasCalcs } from "./canvas-data.mjs";
+import { genStartPosition } from "./randlocation.mjs";
+import {canvasCalcs } from "./canvas-data.mjs";
 
 const socket = io();
 const canvas = document.getElementById("game-window");
@@ -68,21 +70,21 @@ socket.on("init", ({ id, players, token }) => {
 
   // Handle movement
   socket.on("move-player", ({ id, dir, posObj }) => {
-    const movingPlayer = activePlayers.find((obj) => obj.id === id);
-    movingPlayer.moveDir(dir);
+    const playerMoves = activePlayers.find((obj) => obj.id === id);
+    playerMoves.moveDir(dir);
 
     // Force sync in case of lag
-    movingPlayer.x = posObj.x;
-    movingPlayer.y = posObj.y;
+    playerMoves.x = posObj.x;
+    playerMoves.y = posObj.y;
   });
 
   socket.on("stop-player", ({ id, dir, posObj }) => {
-    const stoppingPlayer = activePlayers.find((obj) => obj.id === id);
-    stoppingPlayer.stopDir(dir);
+    const playerStops = activePlayers.find((obj) => obj.id === id);
+    playerStops.stopDir(dir);
 
     // Force sync in case of lag
-    stoppingPlayer.x = posObj.x;
-    stoppingPlayer.y = posObj.y;
+    playerStops.x = posObj.x;
+    playerStops.y = posObj.y;
   });
 
   // Handle new token gen
@@ -140,19 +142,18 @@ const draw = () => {
 
   // Game title
   context.font = `16px 'Press Start 2P'`;
-  context.fillText("Coin Race", canvasCalcs.canvasWidth / 2, 32.5);
+  context.fillText("Token Chase Game", canvasCalcs.canvasWidth / 2 + 10, 32.5);
 
 
   // Calculate score and draw players each frame
   activePlayers.forEach((player) => {
     player.draw(context, item, { playerImg, opponentImg }, activePlayers);
-  //  player.draw(context, item, { mainPlayerArt, otherPlayerArt }, activePlayers);
+
   });
 
 
   // Draw current token
   item.draw(context, { red_gem, blue_gem, green_gem, diamond });
-//  item.draw(context, { bronzeCoinArt, silverCoinArt, goldCoinArt });
 
   // Remove captured token
   if (item.captured) {

@@ -14,7 +14,7 @@ class Player {
   }
 
 /*
-  //context text-fill color chooser based on player
+  //context text-fill color chooser based on player ID
   const fillColor = (indx) => {
     if (indx.includes('1')) {
       return context.fillStyle = 'red';
@@ -37,19 +37,10 @@ class Player {
     currDir.forEach((dir) => this.movePlayer(dir, this.speed));
 
     if (this.isMain) {
-    
-    // Display Player Rank
-    //  contxt.fillStyle = fillColor(this.id);
-/*      context.fillStyle = 'white';
-      context.font = `13px 'Press Start 2P'`;
-      context.fillText(`Rank: `, 520, 32.5);
-*/
-      context.fillStyle = 'red';
-      context.font = `13px 'Press Start 2P'`;
-      context.fillText(this.calculateRank(activePlayers), 520, 32.5);
 
-    // Display Player Score
-    //  fillColor(id);
+
+  // Display Player Score
+  //  fillColor(id);
       context.fillStyle = 'white';
       context.font = `13px 'Press Start 2P'`;
       context.textAlign = "left";
@@ -59,15 +50,25 @@ class Player {
       context.font = `13px 'Press Start 2P'`;
       context.textAlign = "left";
       context.fillText(`${this.score} `, 140, 48);
-   
+  
+
+    // Display Player Rank
+           
+      context.fillStyle = 'red';
+      context.font = `13px 'Press Start 2P'`;
+      context.fillText(this.calculateRank(activePlayers).slice(5,), 540, 32.5);
+
+      context.fillStyle = 'white';
+      context.font = `13px 'Press Start 2P'`;
+      context.fillText(`Rank:`, 480, 32.5);
+
+  
       //(this.calculateRank(activePlayers), 560, 32.5);
-    console.log(`Score: ${this.score} `);
+  //  console.log(`Score: ${this.score} `);
 
       context.drawImage(imgObj.playerImg, this.x, this.y)
-   //   context.drawImage(imgObj.mainPlayerArt, this.x, this.y);
     } else {
       context.drawImage(imgObj.opponentImg, this.x, this.y);
-  //    context.drawImage(imgObj.otherPlayerArt, this.x, this.y);
     }
 
     if (this.collision(token)) {
@@ -114,13 +115,12 @@ class Player {
 
   calculateRank(arr) {
     const sortedScores = arr.sort((a, b) => b.score - a.score);
-    const mainPlayerRank =
+    const playerRank =
       this.score === 0
         ? arr.length
         : sortedScores.findIndex((obj) => obj.id === this.id) + 1;
-//*    return `${mainPlayerRank}/${arr.length}`; */
 
-    return `Rank: ${mainPlayerRank} / ${arr.length}`;
+    return `Rank: ${playerRank} / ${arr.length}`;
     
   }
 }
